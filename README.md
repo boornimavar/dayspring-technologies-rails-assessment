@@ -55,34 +55,293 @@ Ruby Concepts Applied in Rails
 
 **12. Custom** **routes** and custom controller actions - to create and navigate to a custom page in the app.
 
-# Creating Rails App
-## To create a rails application
-rails new store_app -d postgresql
-## To create table with default models and controllers
-rails g scaffold Product name:string price:integer
-## To save changes to the table
-rails db:migrate
-## To run the rails server
-rails server
-## To open rails console
-rails console
-## To create model manually
-rails g model Product name:string price:integer
-## To add the routes for the table 
-do resources :products
-## To create controller manually
-rails g controller products
-***Convention over Configuration***
-Rails automatically expects:
-table: products
-controller: ProductsController
-views folder: views/products
-We configured nothing. Rails guessed everything.
+# Rails Practice Log – CRUD with Hotel Table
 
-# 4 ways to insert values into table
-1. through console
-   
-2. through db\seed.rb
-   1. Using Raker Gem
-3. through UI
-4. through Dbeaver
+This document tracks the practical concepts explored while learning Ruby on Rails using a single `Hotel` table without scaffolding.
+
+---
+
+## Creating a Rails Application
+
+```bash
+rails new store_app -d postgresql
+```
+
+---
+
+## Creating a Table using Scaffold (default MVC)
+
+```bash
+rails g scaffold Product name:string price:integer
+rails db:migrate
+```
+
+Scaffold automatically creates:
+- Model
+- Controller
+- Views
+- Routes
+
+---
+
+## Running the Application
+
+```bash
+rails server
+rails console
+```
+
+---
+
+## Creating Model Manually (without scaffold)
+
+```bash
+rails g model Product name:string price:integer
+rails db:migrate
+```
+
+---
+
+## Adding Routes Manually
+
+In `config/routes.rb`:
+
+```ruby
+resources :products
+```
+
+---
+
+## Creating Controller Manually
+
+```bash
+rails g controller products
+```
+
+---
+
+## Convention Over Configuration
+
+Rails automatically assumes:
+
+| Concept | Rails expects |
+|---|---|
+| Table name | `products` |
+| Controller | `ProductsController` |
+| Views folder | `views/products` |
+
+No configuration needed. Rails infers everything from naming.
+
+---
+
+## Creating Hotel Table for Practice (without scaffold)
+
+```bash
+rails g model Hotel name:string location:string rating:integer phone_number:string active:boolean
+rails db:migrate
+```
+
+---
+
+## Creating Controller for Hotel
+
+```bash
+rails g controller hotels
+```
+
+Add to `config/routes.rb`:
+
+```ruby
+resources :hotels
+```
+
+---
+
+## Hotels Controller (CRUD)
+
+`app/controllers/hotels_controller.rb`
+
+```ruby
+class HotelsController < ApplicationController
+  before_action :set_hotel, only: [:show, :edit, :update, :destroy]
+
+  def index
+    @hotels = Hotel.all
+  end
+
+  def show
+  end
+
+  def new
+    @hotel = Hotel.new
+  end
+
+  def create
+    @hotel = Hotel.new(hotel_params)
+    if @hotel.save
+      redirect_to @hotel, notice: "Hotel created successfully"
+    else
+      render :new
+    end
+  end
+
+  def edit
+  end
+
+  def update
+    if @hotel.update(hotel_params)
+      redirect_to @hotel, notice: "Hotel updated successfully"
+    else
+      render :edit
+    end
+  end
+
+  def destroy
+    @hotel.destroy
+    redirect_to hotels_path, notice: "Hotel deleted"
+  end
+
+  private
+
+  def set_hotel
+    @hotel = Hotel.find(params[:id])
+  end
+
+  def hotel_params
+    params.require(:hotel).permit(:name, :location, :rating, :phone_number, :active)
+  end
+end
+```
+
+---
+
+## Views
+
+Create folder: `app/views/hotels/`
+
+### index.html.erb
+
+```erb
+<h1>Hotels</h1>
+
+<%= link_to "New Hotel", new_hotel_path %>
+
+<ul>
+  <% @hotels.each do |hotel| %>
+    <li>
+      <%= link_to hotel.name, hotel_path(hotel) %>
+      | <%= link_to "Edit", edit_hotel_path(hotel) %>
+      | <%= link_to "Delete", hotel_path(hotel), method: :delete, data: { confirm: "Are you sure?" } %>
+    </li>
+  <% end %>
+</ul>
+```
+
+### show.html.erb
+
+```erb
+<h2><%= @hotel.name %></h2>
+
+<p>Location: <%= @hotel.location %></p>
+<p>Rating: <%= @hotel.rating %></p>
+<p>Phone: <%= @hotel.phone_number %></p>
+<p>Active: <%= @hotel.active %></p>
+
+<%= link_to "Back", hotels_path %>
+```
+
+### new.html.erb
+
+```erb
+<h1>New Hotel</h1>
+
+<%= form_with model: @hotel do |f| %>
+  <p>Name: <%= f.text_field :name %></p>
+  <p>Location: <%= f.text_field :location %></p>
+  <p>Rating: <%= f.number_field :rating %></p>
+  <p>Phone: <%= f.text_field :phone_number %></p>
+  <p>Active: <%= f.check_box :active %></p>
+
+  <%= f.submit %>
+<% end %>
+```
+
+### edit.html.erb
+
+```erb
+<h1>Edit Hotel</h1>
+
+<%= form_with model: @hotel do |f| %>
+  <p>Name: <%= f.text_field :name %></p>
+  <p>Location: <%= f.text_field :location %></p>
+  <p>Rating: <%= f.number_field :rating %></p>
+  <p>Phone: <%= f.text_field :phone_number %></p>
+  <p>Active: <%= f.check_box :active %></p>
+
+  <%= f.submit %>
+<% end %>
+```
+
+---
+
+## 4 Ways to Insert Data into the Table
+
+### 1) Through Rails Console
+
+```ruby
+Hotel.create(name: "Oberoi", location: "Delhi", rating: 4, phone_number: "88888", active: true)
+```
+
+---
+
+### 2) Through db/seeds.rb using Faker
+
+Add to Gemfile:
+
+```ruby
+gem 'faker'
+```
+
+Run:
+
+```bash
+bundle install
+```
+
+`db/seeds.rb`:
+
+```ruby
+5.times do
+  Hotel.create(
+    name: Faker::Restaurant.name,
+    location: Faker::Address.city,
+    rating: rand(1..5),
+    phone_number: Faker::PhoneNumber.cell_phone,
+    active: true
+  )
+end
+```
+
+Run:
+
+```bash
+rails db:seed
+```
+
+---
+
+### 3) Through Rails UI (Forms)
+
+Using `form_with` in views to submit data.
+
+---
+
+### 4) Through DBeaver (Database Client)
+
+Insert records directly into PostgreSQL and verify using:
+
+```ruby
+Hotel.all
+```
+
+---
