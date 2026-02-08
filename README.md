@@ -54,3 +54,35 @@ Ruby Concepts Applied in Rails
 11. **Access Modifiers** in Ruby
 
 **12. Custom** **routes** and custom controller actions - to create and navigate to a custom page in the app.
+
+# Creating Rails App
+## To create a rails application
+rails new store_app -d postgresql
+## To create table with default models and controllers
+rails g scaffold Product name:string price:integer
+## To save changes to the table
+rails db:migrate
+## To run the rails server
+rails server
+## To open rails console
+rails console
+## To create model manually
+rails g model Product name:string price:integer
+## To add the routes for the table 
+do resources :products
+## To create controller manually
+rails g controller products
+***Convention over Configuration***
+Rails automatically expects:
+table: products
+controller: ProductsController
+views folder: views/products
+We configured nothing. Rails guessed everything.
+
+# 4 ways to insert values into table
+1. through console
+   
+2. through db\seed.rb
+   1. Using Raker Gem
+3. through UI
+4. through Dbeaver
